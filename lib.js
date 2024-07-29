@@ -19,17 +19,19 @@ function study(columnId, courseId, studyId, time, videoTime) {
                     id: studyId,
                 },
                 headers: {
-                    'authority': 'www.ejxjy.com',
-                    'accept': '*/*',
+                    authority: 'www.ejxjy.com',
+                    accept: '*/*',
                     'accept-language': 'zh-CN,zh;q=0.9',
                     'cache-control': 'no-cache',
-                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                    'cookie': COOKIES,
-                    'dnt': '1',
-                    'origin': 'https://www.ejxjy.com',
-                    'pragma': 'no-cache',
-                    'referer': `https://www.ejxjy.com/a/sys/portal/myCourseDetail.html?courseId=${courseId}&columnId=${columnId}`,
-                    'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+                    'content-type':
+                        'application/x-www-form-urlencoded; charset=UTF-8',
+                    cookie: COOKIES,
+                    dnt: '1',
+                    origin: 'https://www.ejxjy.com',
+                    pragma: 'no-cache',
+                    referer: `https://www.ejxjy.com/a/sys/portal/myCourseDetail.html?courseId=${courseId}&columnId=${columnId}`,
+                    'sec-ch-ua':
+                        '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
                     'sec-ch-ua-mobile': '?0',
                     'sec-ch-ua-platform': '"Windows"',
                     'sec-fetch-dest': 'empty',
@@ -39,7 +41,7 @@ function study(columnId, courseId, studyId, time, videoTime) {
                         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
                     'x-requested-with': 'XMLHttpRequest',
                 },
-            },
+            }
         )
         .then(({ data }) => {
             if (data.code == '0000') {
@@ -59,17 +61,17 @@ function getCurrClass(type = '公需科目', num = 0) {
     let checked = 1;
     switch (type) {
         case '公需科目':
-            unStudyListSelect = '#con_a_2 .courseList1 li .courseListB a';
+            unStudyListSelect = '#con_a_2 .courseList1 li';
             hover = 1;
             checked = 1;
             break;
         case '专业科目':
-            unStudyListSelect = '#con_b_2 .courseList1 li .courseListB a';
+            unStudyListSelect = '#con_b_2 .courseList1 li';
             hover = 2;
             checked = 2;
             break;
         case '自选课程':
-            unStudyListSelect = '#con_c_2 .courseList1 li .courseListB a';
+            unStudyListSelect = '#con_c_2 .courseList1 li';
             hover = 3;
             checked = 3;
             break;
@@ -85,15 +87,15 @@ function getCurrClass(type = '公需科目', num = 0) {
                 checked,
             },
             headers: {
-                'authority': 'www.ejxjy.com',
-                'accept':
-                    'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                authority: 'www.ejxjy.com',
+                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'accept-language': 'zh-CN,zh;q=0.9',
                 'cache-control': 'no-cache',
-                'cookie': COOKIES,
-                'dnt': '1',
-                'pragma': 'no-cache',
-                'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+                cookie: COOKIES,
+                dnt: '1',
+                pragma: 'no-cache',
+                'sec-ch-ua':
+                    '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
                 'sec-ch-ua-mobile': '?0',
                 'sec-ch-ua-platform': '"Windows"',
                 'sec-fetch-dest': 'document',
@@ -107,15 +109,14 @@ function getCurrClass(type = '公需科目', num = 0) {
         })
         .then(({ data }) => {
             const $ = cheerio.load(data, { decodeEntities: false }, false);
-            const aElms = $(unStudyListSelect);
-            if (aElms.length == 0) return null;
-
-            const aElm = aElms[num];
-
+            const liElms = $(unStudyListSelect);
+            if (liElms.length == 0) return { title: '', courseId: null };
+            const liElm = liElms[num];
+            const title = $(liElm).find('h4[title]').attr('title').trim();
+            const aElm = $(liElm).find('.courseListB a')[0];
             const { href } = aElm.attribs;
-
             const courseId = href.match(/(?<=courseId=)(.{32})/)[0];
-            return courseId;
+            return { title, courseId };
         });
 }
 
@@ -125,17 +126,17 @@ function getClassList(type = '公需科目', pageNo = 1) {
     let checked = 1;
     switch (type) {
         case '公需科目':
-            unStudyListSelect = '#con_a_1 .courseList1 li';
+            unStudyListSelect = '#con_a_2 .courseList1 li';
             hover = 1;
             checked = 1;
             break;
         case '专业科目':
-            unStudyListSelect = '#con_b_1 .courseList1 li';
+            unStudyListSelect = '#con_b_2 .courseList1 li';
             hover = 2;
             checked = 2;
             break;
         case '自选课程':
-            unStudyListSelect = '#con_c_1 .courseList1 li';
+            unStudyListSelect = '#con_c_2 .courseList1 li';
             hover = 3;
             checked = 3;
             break;
@@ -153,17 +154,17 @@ function getClassList(type = '公需科目', pageNo = 1) {
             }),
             {
                 headers: {
-                    'authority': 'www.ejxjy.com',
-                    'accept':
-                        'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                    authority: 'www.ejxjy.com',
+                    accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                     'accept-language': 'zh-CN,zh;q=0.9',
                     'cache-control': 'no-cache',
-                    'cookie': COOKIES,
-                    'dnt': '1',
-                    'origin': 'https://www.ejxjy.com',
-                    'pragma': 'no-cache',
-                    'referer': 'https://www.ejxjy.com/a/sys/portal/person',
-                    'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+                    cookie: COOKIES,
+                    dnt: '1',
+                    origin: 'https://www.ejxjy.com',
+                    pragma: 'no-cache',
+                    referer: 'https://www.ejxjy.com/a/sys/portal/person',
+                    'sec-ch-ua':
+                        '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
                     'sec-ch-ua-mobile': '?0',
                     'sec-ch-ua-platform': '"Windows"',
                     'sec-fetch-dest': 'document',
@@ -174,7 +175,7 @@ function getClassList(type = '公需科目', pageNo = 1) {
                     'user-agent':
                         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
                 },
-            },
+            }
         )
         .then(({ data }) => {
             const $ = cheerio.load(data, { decodeEntities: false }, false);
@@ -198,16 +199,16 @@ function goToClass(courseId) {
                 courseId,
             },
             headers: {
-                'authority': 'www.ejxjy.com',
-                'accept':
-                    'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                authority: 'www.ejxjy.com',
+                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
                 'accept-language': 'zh-CN,zh;q=0.9',
                 'cache-control': 'no-cache',
-                'cookie': COOKIES,
-                'dnt': '1',
-                'pragma': 'no-cache',
-                'referer': 'https://www.ejxjy.com/a/sys/portal/person?pageNo=1',
-                'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+                cookie: COOKIES,
+                dnt: '1',
+                pragma: 'no-cache',
+                referer: 'https://www.ejxjy.com/a/sys/portal/person?pageNo=1',
+                'sec-ch-ua':
+                    '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
                 'sec-ch-ua-mobile': '?0',
                 'sec-ch-ua-platform': '"Windows"',
                 'sec-fetch-dest': 'document',
@@ -221,42 +222,49 @@ function goToClass(courseId) {
         })
         .then(({ data }) => {
             const $ = cheerio.load(data, { decodeEntities: false }, false);
-            const classIdArr = Array.from($('.catalog.menu_body a')).map(elm => {
-                return new URLSearchParams(elm.attribs.href).get('columnId');
-            });
+            const classIdArr = Array.from($('.catalog.menu_body a')).map(
+                elm => {
+                    return new URLSearchParams(elm.attribs.href).get(
+                        'columnId'
+                    );
+                }
+            );
 
             return classIdArr;
         });
 }
 
 async function getClassTime(courseId, columnId) {
-    const { data } = await axios.get('https://www.ejxjy.com/a/sys/portal/myCourseDetail.html', {
-        params: {
-            courseId,
-            columnId,
-        },
-        headers: {
-            'authority': 'www.ejxjy.com',
-            'accept':
-                'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'accept-language': 'zh-CN,zh;q=0.9',
-            'cache-control': 'no-cache',
-            'cookie': COOKIES,
-            'dnt': '1',
-            'pragma': 'no-cache',
-            'referer': `https://www.ejxjy.com/a/sys/portal/myCourseDetail.html?courseId=${courseId}`,
-            'sec-ch-ua': '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-fetch-dest': 'document',
-            'sec-fetch-mode': 'navigate',
-            'sec-fetch-site': 'same-origin',
-            'sec-fetch-user': '?1',
-            'upgrade-insecure-requests': '1',
-            'user-agent':
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
-        },
-    });
+    const { data } = await axios.get(
+        'https://www.ejxjy.com/a/sys/portal/myCourseDetail.html',
+        {
+            params: {
+                courseId,
+                columnId,
+            },
+            headers: {
+                authority: 'www.ejxjy.com',
+                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'accept-language': 'zh-CN,zh;q=0.9',
+                'cache-control': 'no-cache',
+                cookie: COOKIES,
+                dnt: '1',
+                pragma: 'no-cache',
+                referer: `https://www.ejxjy.com/a/sys/portal/myCourseDetail.html?courseId=${courseId}`,
+                'sec-ch-ua':
+                    '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'document',
+                'sec-fetch-mode': 'navigate',
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-user': '?1',
+                'upgrade-insecure-requests': '1',
+                'user-agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+            },
+        }
+    );
 
     // 公共课程才有
     // const $ = cheerio.load(data, { decodeEntities: false }, false);
@@ -276,8 +284,45 @@ async function getClassTime(courseId, columnId) {
 
     return { studyId, duration };
 }
+
+async function keepAlive() {
+    try {
+        await axios.get('https://www.ejxjy.com/a/sys/portal/person', {
+            params: {
+                pageNo: '1',
+                pageSize: '5', // 定值
+                hover,
+                checked,
+            },
+            headers: {
+                authority: 'www.ejxjy.com',
+                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'accept-language': 'zh-CN,zh;q=0.9',
+                'cache-control': 'no-cache',
+                cookie: COOKIES,
+                dnt: '1',
+                pragma: 'no-cache',
+                'sec-ch-ua':
+                    '".Not/A)Brand";v="99", "Google Chrome";v="103", "Chromium";v="103"',
+                'sec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': '"Windows"',
+                'sec-fetch-dest': 'document',
+                'sec-fetch-mode': 'navigate',
+                'sec-fetch-site': 'none',
+                'sec-fetch-user': '?1',
+                'upgrade-insecure-requests': '1',
+                'user-agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36',
+            },
+        });
+    } catch (error) {
+        // 忽略错误
+    }
+}
+
 module.exports = {
     study,
+    keepAlive,
     getCurrClass,
     getClassList,
     goToClass,

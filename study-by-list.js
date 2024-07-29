@@ -1,6 +1,6 @@
 const fs = require('fs');
 const LIST = require('./list.json');
-const { study, getCurrClass, getClassTime: goToStudyPage } = require('./lib.js');
+const { study, keepAlive, getClassTime: goToStudyPage } = require('./lib.js');
 const { sleep } = require('./utils.js');
 
 const STEP = 55 * 1000;
@@ -8,7 +8,7 @@ const STEP = 55 * 1000;
 (async () => {
     setInterval(async () => {
         try {
-            await getCurrClass('公需科目', 3);
+            await keepAlive();
         } catch (error) {
             // 刷新失败忽略
         }
@@ -24,16 +24,31 @@ const STEP = 55 * 1000;
             if (c.isStudy) continue;
 
             // 模拟进入页面
-            const { studyId, duration } = await goToStudyPage(courseId, columnId);
+            const { studyId, duration } = await goToStudyPage(
+                courseId,
+                columnId
+            );
             await sleep(1000);
 
             let currT = 58;
             let isLast = false;
 
-            console.log('columnId, courseId, studyId, currT', columnId, courseId, studyId, currT);
+            console.log(
+                'columnId, courseId, studyId, currT',
+                columnId,
+                courseId,
+                studyId,
+                currT
+            );
             do {
                 await sleep(STEP);
-                const [err, res] = await study(columnId, courseId, studyId, currT, duration);
+                const [err, res] = await study(
+                    columnId,
+                    courseId,
+                    studyId,
+                    currT,
+                    duration
+                );
                 if (err) {
                     console.log('err', err);
                 } else {
@@ -43,15 +58,23 @@ const STEP = 55 * 1000;
                         title,
                         res,
                         currT,
-                        duration,
+                        duration
                     );
 
                     // 最后一轮跳出
                     if (isLast) {
                         c.isStudy = true;
-                        fs.writeFileSync('./list.json', JSON.stringify(LIST, null, 4));
+                        fs.writeFileSync(
+                            './list.json',
+                            JSON.stringify(LIST, null, 4)
+                        );
                         break;
                     }
+					
+					// 2 代表学完了
+					if(res?.status == '2'){
+						isLast = true;
+					}
 
                     if (currT + 60 > duration) {
                         currT = Math.ceil(duration);
